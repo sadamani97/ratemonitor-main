@@ -1,16 +1,6 @@
 [build]
-  command = "cd backend && npm install && cd ../frontend && npm install && npm run build"
+  command = "cd frontend && npm install && npm run build"
   publish = "frontend/dist"
-  functions = "backend/functions"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["playwright", "playwright-core"]
-
-[[redirects]]
-  from = "/api/rates*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
 
 [[redirects]]
   from = "/*"
