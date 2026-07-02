@@ -15,7 +15,7 @@ app.use('/api/rates', ratesRoutes);
 // Export for Netlify serverless functions
 export default app;
 
-if (process.env.NODE_ENV !== 'production' && !process.env.NETLIFY) {
+if (!process.env.NETLIFY) {
   app.listen(PORT, () => console.log(`Rate Monitor backend running on port ${PORT}`));
 }
 
