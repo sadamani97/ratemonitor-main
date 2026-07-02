@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "scheduler": "node scheduler/scheduler.js"
+    "scheduler": "node scheduler/scheduler.js",
+    "postinstall": "npx playwright install chromium"
   },
   "dependencies": {
     "cors": "^2.8.6",
