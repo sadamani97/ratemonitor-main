@@ -78,6 +78,18 @@ async function selectReceiveCountry(page, currency) {
 }
 
 export async function scrapeMoneyGram(fromCur = 'CAD', toCurrencies = SUPPORTED) {
+  // DataDome challenges are intermittent in unattended runs — a second
+  // attempt a few seconds later frequently succeeds where the first didn't.
+  let results = await scrapeMoneyGramOnce(fromCur, toCurrencies);
+  if (results.length === 0) {
+    console.warn('[MoneyGram] First attempt returned no data — retrying once');
+    await new Promise(r => setTimeout(r, 5000));
+    results = await scrapeMoneyGramOnce(fromCur, toCurrencies);
+  }
+  return results;
+}
+
+async function scrapeMoneyGramOnce(fromCur, toCurrencies) {
   const results = [];
   let context;
 
@@ -118,13 +130,16 @@ export async function scrapeMoneyGram(fromCur = 'CAD', toCurrencies = SUPPORTED)
     // Warm up DataDome session on the first page load
     const warmed = await waitForFeeQuote(page, 'INR', 45000);
     if (!warmed) {
+      // The page can crash mid-challenge (DataDome killing the tab) — treat
+      // that the same as a soft block instead of letting it blow up as an
+      // uncaught "Target crashed" error.
       const blocked = await page.evaluate(() =>
         document.title?.includes('blocked') || document.body?.innerText?.includes('You have been blocked')
-      );
+      ).catch(() => null);
       if (blocked) {
         console.warn('[MoneyGram] DataDome hard block — requires Google Chrome (headed). Set MONEYGRAM_PROXY for server use.');
       } else {
-        console.warn('[MoneyGram] DataDome still blocking — ensure Google Chrome is installed');
+        console.warn('[MoneyGram] DataDome still blocking (or tab crashed) — ensure Google Chrome is installed');
       }
       return [];
     }
