@@ -44,11 +44,15 @@ export async function getRates(req, res) {
   }
 
   // ── Live scraping fallback (Netlify / no DB) ────────────────────────────
+  // (In-memory cache check bypassed to ensure fresh live scraping if DB is offline)
   const now = Date.now();
   const cached = memCache[cacheKey];
+  // If you want to completely disable the cache, we comment out this return:
+  /*
   if (cached && now - cached.ts < 5 * 60 * 1000) {
     return res.json({ success: true, source: 'cache', data: cached.data });
   }
+  */
 
   try {
     const currencies = toCurrency ? [toCurrency] : TO_CURRENCIES;
