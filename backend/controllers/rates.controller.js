@@ -32,8 +32,8 @@ export async function getRates(req, res) {
   const toCurrency = req.query.to || null;
   const cacheKey = toCurrency || 'all';
 
+  /* ── Try MySQL Bypassed (Only live data is wanted) ────────────────────────
   try {
-    // ── Try MySQL ──────────────────────────────────────────────────────────
     const rows = await getLatestRates(toCurrency);
     if (rows.length > 0) {
       const remitbeeMap = await getRemitbeeRates();
@@ -42,6 +42,7 @@ export async function getRates(req, res) {
   } catch {
     // MySQL not configured — fall through to live scraping
   }
+  */
 
   // ── Live scraping fallback (Netlify / no DB) ────────────────────────────
   // (In-memory cache check bypassed to ensure fresh live scraping if DB is offline)
