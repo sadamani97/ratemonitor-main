@@ -11,12 +11,16 @@ const TO_CURRENCIES = ['INR', 'PHP', 'LKR', 'UAH', 'NPR', 'BDT', 'PKR'];
 const PROVIDERS = [
   { name: 'Remitbee',      fn: scrapeRemitbee    },
   { name: 'Remitly',       fn: scrapeRemitly     },
-  { name: 'TapTap Send',   fn: scrapeTapTapSend  },
-  { name: 'LemFi',         fn: scrapeLemFi       },
   { name: 'Instarem',      fn: scrapeInstarem    },
-  { name: 'MoneyGram',     fn: scrapeMoneyGram   },
-  { name: 'Kabayan Remit', fn: scrapeKabayanRemit },
 ];
+
+// In a local environment with enough RAM and a residential IP, you can safely enable these:
+if (!process.env.RENDER && process.env.NODE_ENV !== 'production') {
+  PROVIDERS.push({ name: 'TapTap Send',   fn: scrapeTapTapSend  });
+  PROVIDERS.push({ name: 'LemFi',         fn: scrapeLemFi       });
+  PROVIDERS.push({ name: 'MoneyGram',     fn: scrapeMoneyGram   });
+  PROVIDERS.push({ name: 'Kabayan Remit', fn: scrapeKabayanRemit });
+}
 
 // Per-currency in-memory cache (5 min) — keyed by currency code or 'all'
 const memCache = {};
