@@ -9,8 +9,8 @@
 const SUPPORTED = ['INR', 'PHP', 'LKR', 'UAH', 'NPR', 'BDT', 'PKR'];
 
 const COUNTRY_MAP = {
-  INR: 'india',       PHP: 'philippines', LKR: 'sri-lanka',
-  UAH: 'ukraine',     NPR: 'nepal',       BDT: 'bangladesh',
+  INR: 'india', PHP: 'philippines', LKR: 'sri-lanka',
+  UAH: 'ukraine', NPR: 'nepal', BDT: 'bangladesh',
   PKR: 'pakistan',
 };
 
@@ -30,8 +30,8 @@ async function scrapeCurrency(ctx, fromCur, toCur) {
       const body = await r.json();
       const fee = parseFloat(body?.data?.transaction_fee);
       if (!isNaN(fee)) networkFee = fee;
-    } catch {}
-  }).catch(() => {});
+    } catch { }
+  }).catch(() => { });
 
   try {
     await page.goto(
@@ -44,7 +44,7 @@ async function scrapeCurrency(ctx, fromCur, toCur) {
     await page.waitForFunction(
       () => /1\s+CAD\s*=\s*[\d.]{4,}/.test(document.body.innerText),
       { timeout: 25000 }
-    ).catch(() => {});
+    ).catch(() => { });
 
     // Allow the fee API to complete
     await Promise.race([feeCapture, page.waitForTimeout(2000)]);
@@ -91,18 +91,18 @@ async function scrapeCurrency(ctx, fromCur, toCur) {
     }, toCur);
 
     const rate = pageData?.rate;
-    const fee  = networkFee ?? pageData?.fee;
+    const fee = networkFee ?? pageData?.fee;
 
     if (rate && rate > 0 && rate < 1_000_000) {
       console.log(`[LemFi] ${toCur}: rate=${rate.toFixed(4)}, fee=${fee}`);
       return {
-        fromCurrency:    fromCur,
-        toCurrency:      toCur,
-        exchangeRate:    Math.round(rate * 10000) / 10000,
+        fromCurrency: fromCur,
+        toCurrency: toCur,
+        exchangeRate: Math.round(rate * 10000) / 10000,
         promotionalRate: null,
-        fee:             fee ?? null,
-        deliveryTime:    'Minutes',
-        transferType:    'Online',
+        fee: fee ?? null,
+        deliveryTime: 'Minutes',
+        transferType: 'Online',
       };
     } else {
       console.log(`[LemFi] ${toCur}: not supported or rate not found`);
@@ -138,9 +138,10 @@ export async function scrapeLemFi(fromCur = 'CAD', toCurrencies = SUPPORTED) {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    // Run all currencies in parallel — total time ≈ slowest single page (~15s)
+    // Run requested currencies in parallel (usually just 1 currency target requested)
+    const targets = toCurrencies.filter(cur => SUPPORTED.includes(cur));
     const results = await Promise.all(
-      toCurrencies.map(toCur => scrapeCurrency(ctx, fromCur, toCur))
+      targets.map(toCur => scrapeCurrency(ctx, fromCur, toCur))
     );
 
     return results.filter(Boolean);
