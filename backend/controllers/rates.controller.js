@@ -4,23 +4,26 @@ import { scrapeRemitly }    from '../playwright/remitly.js';
 import { scrapeTapTapSend } from '../playwright/taptapsend.js';
 import { scrapeLemFi }      from '../playwright/lemfi.js';
 import { scrapeInstarem }   from '../playwright/instarem.js';
-import { scrapeMoneyGram }    from '../playwright/moneygram.js';
 import { scrapeKabayanRemit } from '../playwright/kabayanremit.js';
+// MoneyGram excluded: requires headed Google Chrome + DataDome bypass (local-only)
+// import { scrapeMoneyGram } from '../playwright/moneygram.js';
+
 
 const TO_CURRENCIES = ['INR', 'PHP', 'LKR', 'UAH', 'NPR', 'BDT', 'PKR'];
 const PROVIDERS = [
   { name: 'Remitbee',      fn: scrapeRemitbee    },
   { name: 'Remitly',       fn: scrapeRemitly     },
   { name: 'Instarem',      fn: scrapeInstarem    },
+  // TapTap Send & LemFi use standard headless Chromium — work on Render free tier
+  { name: 'TapTap Send',   fn: scrapeTapTapSend  },
+  { name: 'LemFi',         fn: scrapeLemFi       },
+  // Kabayan Remit: CAD→PHP only; scraper handles geo-block gracefully (returns [])
+  { name: 'Kabayan Remit', fn: scrapeKabayanRemit },
+  // MoneyGram is EXCLUDED: requires headed real Google Chrome + DataDome bypass.
+  // This is impossible on any Linux server (Render, Railway, Fly.io, etc.) regardless
+  // of plan. It only works on a local Windows/Mac machine with Chrome installed.
+  // { name: 'MoneyGram', fn: scrapeMoneyGram },
 ];
-
-// In a local environment with enough RAM and a residential IP, you can safely enable these:
-if (!process.env.RENDER && process.env.NODE_ENV !== 'production') {
-  PROVIDERS.push({ name: 'TapTap Send',   fn: scrapeTapTapSend  });
-  PROVIDERS.push({ name: 'LemFi',         fn: scrapeLemFi       });
-  PROVIDERS.push({ name: 'MoneyGram',     fn: scrapeMoneyGram   });
-  PROVIDERS.push({ name: 'Kabayan Remit', fn: scrapeKabayanRemit });
-}
 
 // Per-currency in-memory cache (5 min) — keyed by currency code or 'all'
 const memCache = {};
