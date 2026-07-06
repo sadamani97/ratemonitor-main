@@ -46,7 +46,7 @@ export async function getRates(req, res) {
   try {
     const currencies = toCurrency ? [toCurrency] : TO_CURRENCIES;
 
-    // Each provider gets a timeout — MoneyGram needs longer (patchright + UI per currency)
+    // Each provider gets a timeout — MoneyGram gets up to 80s, others 45s
     const withTimeout = (promise, ms) => Promise.race([
       promise,
       new Promise(resolve => setTimeout(() => resolve([]), ms)),
@@ -54,7 +54,7 @@ export async function getRates(req, res) {
 
     const allRates = await Promise.allSettled(
       PROVIDERS.map(p => {
-        const timeoutMs = p.name === 'MoneyGram' ? 120000 : 45000;
+        const timeoutMs = p.name === 'MoneyGram' ? 80000 : 45000;
         return withTimeout(
           p.fn('CAD', currencies).then(rates => rates.map(r => ({ ...r, provider: p.name }))),
           timeoutMs
