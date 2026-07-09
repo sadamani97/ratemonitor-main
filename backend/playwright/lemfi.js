@@ -36,13 +36,13 @@ async function scrapeCurrency(ctx, fromCur, toCur) {
   try {
     await page.goto(
       `https://lemfi.com/en-ca/international-money-transfer/${country}?amount=100&amountType=sending`,
-      { waitUntil: 'commit', timeout: 35000 }
+      { waitUntil: 'domcontentloaded', timeout: 35000 }
     );
 
     // Wait until an actual rate number appears after "1 CAD = " in the DOM
     // The page briefly shows "1 CAD = " (loading), then fills in the rate number
     await page.waitForFunction(
-      () => /1\s+CAD\s*=\s*[\d.]{4,}/.test(document.body.innerText),
+      () => document.body && /1\s+CAD\s*=\s*[\d.]{4,}/.test(document.body.innerText),
       { timeout: 25000 }
     ).catch(() => { });
 
