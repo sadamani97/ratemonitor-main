@@ -10,6 +10,9 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 // Primary API — provider rates with VS Remitbee comparison
+app.get('/', (req, res) => {
+  res.json({ success: true, message: 'Rate Monitor backend API is running.' });
+});
 app.use('/api/rates', ratesRoutes);
 
 // Export for Netlify serverless functions
