@@ -32,28 +32,12 @@ export async function getRates(req, res) {
   const toCurrency = req.query.to || null;
   const cacheKey = toCurrency || 'all';
 
-  /* ── Try MySQL Bypassed (Only live data is wanted) ────────────────────────
-  try {
-    const rows = await getLatestRates(toCurrency);
-    if (rows.length > 0) {
-      const remitbeeMap = await getRemitbeeRates();
-      return res.json({ success: true, source: 'db', data: attachVsRemitbee(rows, remitbeeMap) });
-    }
-  } catch {
-    // MySQL not configured — fall through to live scraping
-  }
-  */
 
-  // ── Live scraping fallback (Netlify / no DB) ────────────────────────────
-  // (In-memory cache check bypassed to ensure fresh live scraping if DB is offline)
+
+  
   const now = Date.now();
   const cached = memCache[cacheKey];
-  // If you want to completely disable the cache, we comment out this return:
-  /*
-  if (cached && now - cached.ts < 5 * 60 * 1000) {
-    return res.json({ success: true, source: 'cache', data: cached.data });
-  }
-  */
+  
 
   try {
     const currencies = toCurrency ? [toCurrency] : TO_CURRENCIES;
