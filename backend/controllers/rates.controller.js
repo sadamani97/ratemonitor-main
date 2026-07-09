@@ -64,19 +64,21 @@ export async function getRates(req, res) {
       new Promise(resolve => setTimeout(() => resolve([]), ms)),
     ]);
 
-    const allRates = await Promise.allSettled(
-      PROVIDERS.map(p => {
-        const timeoutMs = p.name === 'MoneyGram' ? 80000 : 45000;
-        return withTimeout(
+    const results = [];
+    for (const p of PROVIDERS) {
+      const timeoutMs = p.name === 'MoneyGram' ? 80000 : 45000;
+      try {
+        const rates = await withTimeout(
           p.fn('CAD', currencies).then(rates => rates.map(r => ({ ...r, provider: p.name }))),
           timeoutMs
         );
-      })
-    );
+        results.push(...rates);
+      } catch (err) {
+        console.error(`[Scraper] ${p.name} failed:`, err.message);
+      }
+    }
 
-    const rows = allRates
-      .filter(r => r.status === 'fulfilled')
-      .flatMap(r => r.value)
+    const rows = results
       .map(r => ({
         provider:         r.provider,
         from_currency:    r.fromCurrency || 'CAD',
