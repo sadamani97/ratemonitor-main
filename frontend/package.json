@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.com/sadamani97/ratemonitor",
+  "homepage": "https://sadamani97.github.io/ratemonitor-main",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
