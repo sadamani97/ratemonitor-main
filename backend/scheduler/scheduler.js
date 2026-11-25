@@ -1,7 +1,12 @@
 import cron from 'node-cron';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
+
+const ROOT_DIR = path.basename(process.cwd()) === 'backend'
+  ? path.resolve(process.cwd(), '..')
+  : process.cwd();
+const SCREENSHOT_DIR = path.resolve(ROOT_DIR, 'screenshots');
+
 import { scrapeRemitbee }  from '../playwright/remitbee.js';
 import { scrapeRemitly }   from '../playwright/remitly.js';
 import { scrapeTapTapSend } from '../playwright/taptapsend.js';
@@ -10,10 +15,6 @@ import { scrapeInstarem }  from '../playwright/instarem.js';
 import { scrapeMoneyGram }    from '../playwright/moneygram.js';
 import { scrapeKabayanRemit } from '../playwright/kabayanremit.js';
 import { saveRates, saveLog } from '../models/rateModel.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SCREENSHOT_DIR = path.resolve(__dirname, '../../screenshots');
-if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
 const FROM_CUR     = 'CAD';
 const TO_CURRENCIES = ['INR', 'PHP', 'LKR', 'UAH', 'NPR', 'BDT', 'PKR'];

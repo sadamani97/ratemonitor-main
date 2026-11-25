@@ -20,9 +20,18 @@ dist-ssr
 .DS_Store
 *.suo
 *.ntvs*
-*.njsproj
 *.sln
 *.sw?
+
+# Local environment files
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+
+# Runtime artifacts
+screenshots/
 
 # Local Netlify folder
 .netlify
